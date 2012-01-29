@@ -1,0 +1,130 @@
+#! /bin/sh
+#
+# zwc/bzwc/lzwc/xzwc - frontend for wc to handle also gz, bz2, lzma, xz files.
+# (C) Martin Vaeth <martin@mvath.de>
+#
+Fatal() {
+	printf '%s: %s\n' "${0##*/}" "${*}" >&2
+	exitstatus=2
+	exit ${exitstatus}
+}
+
+Push() {
+	case "${1}" in
+	*)	shift
+		eval "${1}=''";;
+	esac
+	PushD_="${1}"
+	shift
+	eval "for PushA_
+	do	[ -z \"\${${PushD_}}\" ] && ${PushD_}=\\' \
+			|| ${PushD_}=\"\${${PushD_}} '\"
+		PushB_=\"\${PushA_}\"
+		while {
+			PushC_=\"\${PushB_%%\\'*}\"
+			[ \"\${PushC_}\" != \"\${PushB_}\" ]
+		}
+		do	${PushD_}=\"\${${PushD_}}\${PushC_}'\\\\''\"
+			PushB_=\"\${PushB_#*\\'}\"
+		done
+		${PushD_}=\"\${${PushD_}}\${PushB_}'\"
+	done"
+}
+
+tempdir=''
+process=''
+exitstatus=0
+Cleanup() {
+	trap : EXIT HUP INT TERM
+	for cleani in ${process}
+	do	kill "${cleani}"
+	done
+	process=''
+	[ -n "${tempdir}" ] && test -d "${tempdir}" && rm -rf -- "${tempdir}"
+	tempdir=''
+	trap - EXIT HUP INT TERM
+	exit ${exitstatus}
+}
+trap Cleanup EXIT HUP INT TERM
+
+MkTemp() {
+	[ -n "${tempdir}" ] && return
+	tempdir=`umask 077 && mktemp -d "/tmp/${0##*/}.XXXXXXXX"` && \
+		[ -n "${tempdir}" ] && test -d "${tempdir}" || \
+		Fatal 'cannot create temporary directory'
+}
+
+RunFifo() {
+	fifo="${1}"
+	e='1'
+	shift
+	MkTemp
+	fifo="${tempdir}/${fifo}"
+	while n="${fifo}(${e})" && test -r "${n}"
+	do	e=$(( ${e} + 1 ))
+	done
+	fifo="${n}"
+	mkfifo -- "${fifo}" || Fatal "cannot create fifo ${fifo}"
+	Push wc "${fifo}"
+	"${@}" >"${fifo}" &
+	[ ${?} -eq 0 ] && process="${process} ${!}" \
+		|| Fatal "error executing ${*} >${fifo}"
+}
+
+PushFile() {
+	nofile=false
+	typ=''
+	case `LC_ALL='C' file -- "${1}"` in
+	"${1}: bzip"*)	typ=bzcat;;
+	"${1}: gzip"*)	typ=zcat;;
+	"${1}: lmza"*)	typ=lzcat;;
+	"${1}: xz"*)	typ=xzcat;;
+	esac
+	if [ -z "${typ}" ]
+	then	case "${1}" in
+		*.lzma|*.LZMA)
+			typ=lzcat
+		;;
+		*.xz|*.XZ)
+			typ=xzcat
+		;;
+		esac
+	fi
+	if [ -z "${typ}" ]
+	then	Push wc "${1}"
+	else	RunFifo "${1##*/}" ${typ} -- "${1}"
+	fi
+}
+
+Push -c wc wc
+remainder=false
+redirect=false
+nofile=:
+for i
+do	case "${i}" in
+	-)	Push wc "${i}"
+		redirect=:
+	;;
+	--)	Push wc "${i}"
+		remainder=:
+	;;
+	-*)	if ${remainder}
+		then	PushFile "${i}"
+		else	Push wc "${i}"
+		fi
+	;;
+	*)	PushFile "${i}"
+	;;
+	esac
+done
+if ${redirect} || ${nofile}
+then	case "${0##*/}" in
+	l*) eval "lzcat | ${wc}"; exitstatus=${?};;
+	x*) eval "xzcat | ${wc}"; exitstatus=${?};;
+	b*) eval "bzcat | ${wc}"; exitstatus=${?};;
+	*)  eval "zcat  | ${wc}"; exitstatus=${?};;
+	esac
+else	eval "${wc}"
+	exitstatus=${?}
+fi
+process=''

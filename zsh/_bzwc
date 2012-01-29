@@ -1,0 +1,9 @@
+#compdef bzwc lzwc xzwc zwc wc
+_arguments -s -S : \
+'(* -)'--help[print help]' \
+{'(--bytes)-c','(-c)--bytes'}'[print byte count]' \
+{'(--chars)-m','(-m)--chars'}'[print character count]' \
+{'(--lines)-l','(-l)--lines'}'[print newline count]' \
+{'(--words)-w','(-w)--words'}'[print words count]' \
+{'(--max-line-length)-L','(-L)--max-line-length'}'[print maximal line length]' \
+'*:file for counting:_files'
