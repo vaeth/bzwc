@@ -11,7 +11,7 @@ Fatal() {
 
 Push() {
 	case "${1}" in
-	*)	shift
+	-*)	shift
 		eval "${1}=''";;
 	esac
 	PushD_="${1}"
@@ -119,10 +119,10 @@ do	case "${i}" in
 done
 if ${redirect} || ${nofile}
 then	case "${0##*/}" in
-	l*) eval "lzcat | ${wc}"; exitstatus=${?};;
-	x*) eval "xzcat | ${wc}"; exitstatus=${?};;
-	b*) eval "bzcat | ${wc}"; exitstatus=${?};;
-	*)  eval "zcat  | ${wc}"; exitstatus=${?};;
+	l*)	eval "lzcat | ${wc}"; exitstatus=${?};;
+	x*)	eval "xzcat | ${wc}"; exitstatus=${?};;
+	b*)	eval "bzcat | ${wc}"; exitstatus=${?};;
+	*)	eval "zcat  | ${wc}"; exitstatus=${?};;
 	esac
 else	eval "${wc}"
 	exitstatus=${?}

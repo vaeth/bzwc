@@ -1,6 +1,6 @@
 #compdef bzwc lzwc xzwc zwc wc
 _arguments -s -S : \
-'(* -)'--help[print help]' \
+'(* -)--help[print help]' \
 {'(--bytes)-c','(-c)--bytes'}'[print byte count]' \
 {'(--chars)-m','(-m)--chars'}'[print character count]' \
 {'(--lines)-l','(-l)--lines'}'[print newline count]' \
