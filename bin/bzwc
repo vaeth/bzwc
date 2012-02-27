@@ -1,7 +1,7 @@
 #! /bin/sh
 #
 # zwc/bzwc/lzwc/xzwc - frontend for wc to handle also gz, bz2, lzma, xz files.
-# (C) Martin Vaeth <martin@mvath.de>
+# (C) Martin V\"ath <martin@mvath.de>
 #
 Fatal() {
 	printf '%s: %s\n' "${0##*/}" "${*}" >&2
@@ -10,22 +10,22 @@ Fatal() {
 }
 
 Push() {
-	case "${1}" in
+	case ${1} in
 	-*)	shift
 		eval "${1}=''";;
 	esac
-	PushD_="${1}"
+	PushD_=${1}
 	shift
 	eval "for PushA_
 	do	[ -z \"\${${PushD_}}\" ] && ${PushD_}=\\' \
 			|| ${PushD_}=\"\${${PushD_}} '\"
-		PushB_=\"\${PushA_}\"
+		PushB_=\${PushA_}
 		while {
-			PushC_=\"\${PushB_%%\\'*}\"
+			PushC_=\${PushB_%%\\'*}
 			[ \"\${PushC_}\" != \"\${PushB_}\" ]
 		}
 		do	${PushD_}=\"\${${PushD_}}\${PushC_}'\\\\''\"
-			PushB_=\"\${PushB_#*\\'}\"
+			PushB_=\${PushB_#*\\'}
 		done
 		${PushD_}=\"\${${PushD_}}\${PushB_}'\"
 	done"
@@ -55,7 +55,7 @@ MkTemp() {
 }
 
 RunFifo() {
-	fifo="${1}"
+	fifo=${1}
 	e='1'
 	shift
 	MkTemp
@@ -63,7 +63,7 @@ RunFifo() {
 	while n="${fifo}(${e})" && test -r "${n}"
 	do	e=$(( ${e} + 1 ))
 	done
-	fifo="${n}"
+	fifo=${n}
 	mkfifo -- "${fifo}" || Fatal "cannot create fifo ${fifo}"
 	Push wc "${fifo}"
 	"${@}" >"${fifo}" &
@@ -81,7 +81,7 @@ PushFile() {
 	"${1}: xz"*)	typ=xzcat;;
 	esac
 	if [ -z "${typ}" ]
-	then	case "${1}" in
+	then	case ${1} in
 		*.lzma|*.LZMA)
 			typ=lzcat
 		;;
@@ -101,7 +101,7 @@ remainder=false
 redirect=false
 nofile=:
 for i
-do	case "${i}" in
+do	case ${i} in
 	-)	Push wc "${i}"
 		redirect=:
 	;;
@@ -118,13 +118,13 @@ do	case "${i}" in
 	esac
 done
 if ${redirect} || ${nofile}
-then	case "${0##*/}" in
-	l*)	eval "lzcat | ${wc}"; exitstatus=${?};;
-	x*)	eval "xzcat | ${wc}"; exitstatus=${?};;
-	b*)	eval "bzcat | ${wc}"; exitstatus=${?};;
-	*)	eval "zcat  | ${wc}"; exitstatus=${?};;
+then	case ${0##*/} in
+	l*)	eval "lzcat | ${wc}";;
+	x*)	eval "xzcat | ${wc}";;
+	b*)	eval "bzcat | ${wc}";;
+	*)	eval "zcat | ${wc}";;
 	esac
 else	eval "${wc}"
-	exitstatus=${?}
 fi
+exitstatus=${?}
 process=''
