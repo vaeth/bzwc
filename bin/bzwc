@@ -12,7 +12,7 @@ Fatal() {
 Push() {
 	case ${1} in
 	-*)	shift
-		eval "${1}=''";;
+		eval ${1}=;;
 	esac
 	PushD_=${1}
 	shift
@@ -31,17 +31,17 @@ Push() {
 	done"
 }
 
-tempdir=''
-process=''
+tempdir=
+process=
 exitstatus=0
 Cleanup() {
 	trap : EXIT HUP INT TERM
 	for cleani in ${process}
 	do	kill "${cleani}"
 	done
-	process=''
+	process=
 	[ -n "${tempdir}" ] && test -d "${tempdir}" && rm -rf -- "${tempdir}"
-	tempdir=''
+	tempdir=
 	trap - EXIT HUP INT TERM
 	exit ${exitstatus}
 }
@@ -73,7 +73,7 @@ RunFifo() {
 
 PushFile() {
 	nofile=false
-	typ=''
+	typ=
 	case `LC_ALL='C' file -- "${1}"` in
 	"${1}: bzip"*)	typ=bzcat;;
 	"${1}: gzip"*)	typ=zcat;;
@@ -127,4 +127,4 @@ then	case ${0##*/} in
 else	eval "${wc}"
 fi
 exitstatus=${?}
-process=''
+process=
