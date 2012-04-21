@@ -75,19 +75,21 @@ PushFile() {
 	nofile=false
 	typ=
 	case `LC_ALL='C' file -- "${1}"` in
-	"${1}: bzip"*)	typ=bzcat;;
-	"${1}: gzip"*)	typ=zcat;;
-	"${1}: lmza"*)	typ=lzcat;;
-	"${1}: xz"*)	typ=xzcat;;
+	"${1}: bzip"*)
+		typ=bzcat;;
+	"${1}: gzip"*)
+		typ=zcat;;
+	"${1}: lzma"*)
+		typ=lzcat;;
+	"${1}: xz"*)
+		typ=xzcat;;
 	esac
 	if [ -z "${typ}" ]
 	then	case ${1} in
-		*.lzma|*.LZMA)
-			typ=lzcat
-		;;
-		*.xz|*.XZ)
-			typ=xzcat
-		;;
+		*.[lL][zZ][mM][aA])
+			typ=lzcat;;
+		*.[xX][zZ])
+			typ=xzcat;;
 		esac
 	fi
 	if [ -z "${typ}" ]
@@ -102,27 +104,31 @@ redirect=false
 nofile=:
 for i
 do	case ${i} in
-	-)	Push wc "${i}"
-		redirect=:
-	;;
-	--)	Push wc "${i}"
-		remainder=:
-	;;
-	-*)	if ${remainder}
+	-)
+		Push wc "${i}"
+		redirect=:;;
+	--)
+		Push wc "${i}"
+		remainder=:;;
+	-*)
+		if ${remainder}
 		then	PushFile "${i}"
 		else	Push wc "${i}"
-		fi
-	;;
-	*)	PushFile "${i}"
-	;;
+		fi;;
+	*)
+		PushFile "${i}";;
 	esac
 done
 if ${redirect} || ${nofile}
 then	case ${0##*/} in
-	l*)	eval "lzcat | ${wc}";;
-	x*)	eval "xzcat | ${wc}";;
-	b*)	eval "bzcat | ${wc}";;
-	*)	eval "zcat | ${wc}";;
+	l*)
+		eval "lzcat | ${wc}";;
+	x*)
+		eval "xzcat | ${wc}";;
+	b*)
+		eval "bzcat | ${wc}";;
+	*)
+		eval "zcat | ${wc}";;
 	esac
 else	eval "${wc}"
 fi
