@@ -1,35 +1,16 @@
-#! /bin/sh
+#! /usr/bin/env sh
 #
 # zwc/bzwc/lzwc/xzwc - frontend for wc to handle also gz, bz2, lzma, xz files.
 # (C) Martin V\"ath <martin@mvath.de>
 #
+
 Fatal() {
 	printf '%s: %s\n' "${0##*/}" "${*}" >&2
 	exitstatus=2
 	exit ${exitstatus}
 }
 
-Push() {
-	case ${1} in
-	-*)	shift
-		eval ${1}=;;
-	esac
-	PushD_=${1}
-	shift
-	eval "for PushA_
-	do	[ -z \"\${${PushD_}}\" ] && ${PushD_}=\\' \
-			|| ${PushD_}=\"\${${PushD_}} '\"
-		PushB_=\${PushA_}
-		while {
-			PushC_=\${PushB_%%\\'*}
-			[ \"\${PushC_}\" != \"\${PushB_}\" ]
-		}
-		do	${PushD_}=\"\${${PushD_}}\${PushC_}'\\\\''\"
-			PushB_=\${PushB_#*\\'}
-		done
-		${PushD_}=\"\${${PushD_}}\${PushB_}'\"
-	done"
-}
+. push.sh
 
 tempdir=
 process=
