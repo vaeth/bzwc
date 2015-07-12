@@ -3,7 +3,7 @@
 # zwc/bzwc/lzwc/xzwc - frontend for wc to handle also gz, bz2, lzma, xz files.
 # (C) Martin V\"ath <martin@mvath.de>
 #
-
+set -u
 Fatal() {
 	printf '%s: %s\n' "${0##*/}" "$*" >&2
 	exitstatus=2
