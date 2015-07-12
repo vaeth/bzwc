@@ -41,7 +41,7 @@ RunFifo() {
 	shift
 	MkTemp
 	fifo=$tempdir/$fifo
-	while n=$fifo($e) && test -r "$n"
+	while n="$fifo($e)" && test -r "$n"
 	do	e=$(( $e + 1 ))
 	done
 	fifo=$n
