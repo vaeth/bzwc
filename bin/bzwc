@@ -30,9 +30,9 @@ trap Cleanup EXIT HUP INT TERM
 
 MkTemp() {
 	[ -n "${tempdir:++}" ] && return
-	tempdir=`umask 077 && mktemp -d "/tmp/${0##*/}.XXXXXXXX"` && \
-		[ -n "${tempdir:++}" ] && test -d "$tempdir" || \
-		Fatal 'cannot create temporary directory'
+	tempdir=`umask 077 && mktemp -d -- "${TMPDIR:-/tmp}/${0##*/}.XXXXXXXX"` \
+		&& [ -n "${tempdir:++}" ] && test -d "$tempdir" \
+		|| Fatal 'cannot create temporary directory'
 }
 
 RunFifo() {
