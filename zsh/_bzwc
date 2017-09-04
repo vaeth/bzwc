@@ -1,4 +1,4 @@
-#compdef bzwc lzwc xzwc zwc wc
+#compdef brwc bzwc lzwc xzwc zstdwc zwc wc
 _arguments -s -S : \
 '(* -)--help[print help]' \
 {'(--bytes)-c','(-c)--bytes'}'[print byte count]' \

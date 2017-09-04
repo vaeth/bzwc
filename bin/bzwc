@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 #
-# zwc/bzwc/lzwc/xzwc - frontend for wc to handle also gz, bz2, lzma, xz files.
+# zwc/brwc/bzwc/lzwc/xzwc/zstdwc - frontend for wc to handle gz/br/bz2/lzma/xz/zstd files
 # (C) Martin V\"ath <martin@mvath.de>
 #
 set -u
@@ -50,13 +50,14 @@ RunFifo() {
 	mkfifo -- "$fifo" || Fatal "cannot create fifo $fifo"
 	Push wc "$fifo"
 	"$@" >"$fifo" &
-	[ $? -eq 0 ] && process="$process ${!}" \
+	[ $? -eq 0 ] && process="$process $!" \
 		|| Fatal "error executing $* >$fifo"
 }
 
 PushFile() {
 	nofile=false
 	typ=
+	dash='--'
 	case `LC_ALL='C' file -- "$1"` in
 	"$1: bzip"*)
 		typ=bzcat;;
@@ -66,6 +67,11 @@ PushFile() {
 		typ=lzcat;;
 	"$1: xz"*)
 		typ=xzcat;;
+	"$1: Zstandard"*)
+		typ=zstdcat;;
+	"$1: bro"*)
+		typ='bro --decompress'
+		dash='--input';;
 	esac
 	if [ -z "${typ:++}" ]
 	then	case $1 in
@@ -73,11 +79,16 @@ PushFile() {
 			typ=lzcat;;
 		*.[xX][zZ])
 			typ=xzcat;;
+		*.[zZ][sS][tT]|*.[zZ][sS][tT][dD])
+			typ=zstdcat;;
+		*.[bB][rR]|*.[bB][rR][oO]|*.[bB][rR][oO][tT][lL][iI])
+			typ='bro --decompress'
+			dash='--input';;
 		esac
 	fi
 	if [ -z "${typ:++}" ]
 	then	Push wc "$1"
-	else	RunFifo "${1##*/}" $typ -- "$1"
+	else	RunFifo "${1##*/}" $typ $dash "$1"
 	fi
 }
 
@@ -108,8 +119,12 @@ then	case ${0##*/} in
 		eval "lzcat | $wc";;
 	x*)
 		eval "xzcat | $wc";;
+	br*)
+		eval "bro --decompress | $wc";;
 	b*)
 		eval "bzcat | $wc";;
+	zs*)
+		eval "zstdcat | $wc";;
 	*)
 		eval "zcat | $wc";;
 	esac

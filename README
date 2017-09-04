@@ -1,12 +1,12 @@
 (C) Martin Väth <martin@mvath.de>
 This project is under the BSD license.
 
-A POSIX shell wrapper for "wc" supporting compressed files (.xz .lzma .bz2 .gz)
+A POSIX shell wrapper for "wc" supporting compressed files (.xz .lzma .bz2 .gz .zst .br)
 
 All options of "wc" can be used, and as for usual "wc",
 it is possible to pass several files as arguments.
 
-For standard input, the name of the command ("xzwc" "lzwc" "bzwc" or "zwc")
+For standard input, the name of the command (xzwc lzwc brwc bzwc zstdwc zwc)
 determines which type of compressed data is assumed.
 
 For installation, copy the content of bin/ with executable permission
