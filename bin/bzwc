@@ -57,7 +57,6 @@ RunFifo() {
 PushFile() {
 	nofile=false
 	typ=
-	dash='--'
 	case `LC_ALL='C' file -- "$1"` in
 	"$1: bzip"*)
 		typ=bzcat;;
@@ -70,8 +69,7 @@ PushFile() {
 	"$1: Zstandard"*)
 		typ=zstdcat;;
 	"$1: bro"*)
-		typ='bro --decompress'
-		dash='--input';;
+		typ='brotli -dcf';;
 	esac
 	if [ -z "${typ:++}" ]
 	then	case $1 in
@@ -82,13 +80,12 @@ PushFile() {
 		*.[zZ][sS][tT]|*.[zZ][sS][tT][dD])
 			typ=zstdcat;;
 		*.[bB][rR]|*.[bB][rR][oO]|*.[bB][rR][oO][tT][lL][iI])
-			typ='bro --decompress'
-			dash='--input';;
+			typ='brotli -dcf';;
 		esac
 	fi
 	if [ -z "${typ:++}" ]
 	then	Push wc "$1"
-	else	RunFifo "${1##*/}" $typ $dash "$1"
+	else	RunFifo "${1##*/}" $typ -- "$1"
 	fi
 }
 
@@ -120,7 +117,7 @@ then	case ${0##*/} in
 	x*)
 		eval "xzcat | $wc";;
 	br*)
-		eval "bro --decompress | $wc";;
+		eval "brotli -dcf | $wc";;
 	b*)
 		eval "bzcat | $wc";;
 	zs*)
