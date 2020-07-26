@@ -1,7 +1,8 @@
 #!/usr/bin/env sh
+# (C) Martin V\"ath <martin at mvath.de>
+# SPDX-License-Identifier: BSD-3-Clause
 #
 # zwc/brwc/bzwc/lzwc/xzwc/zstdwc - frontend for wc to handle gz/br/bz2/lzma/xz/zstd files
-# (C) Martin V\"ath <martin@mvath.de>
 #
 set -u
 Fatal() {
